@@ -1,0 +1,9 @@
+package database;
+
+public class DatabaseConfig {
+    public static final String URL = "jdbc:mysql://localhost:3306/pharmacy_management";
+    public static final String USERNAME = "root";
+    public static final String PASSWORD = "CHANGE_ME";
+}
+
+Create a new file DatabaseConfig.java and add this code with your real password.
