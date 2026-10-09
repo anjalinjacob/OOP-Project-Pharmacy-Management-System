@@ -151,7 +151,6 @@ public class DeleteCustomerPanel extends JPanel {
             if (deleted) {
                 JOptionPane.showMessageDialog(this, "Customer deleted successfully.",
                         "Success", JOptionPane.INFORMATION_MESSAGE);
-                performSearch();
             } else {
                 JOptionPane.showMessageDialog(this, "Delete failed. Customer may no longer exist.",
                         "Error", JOptionPane.ERROR_MESSAGE);

@@ -58,7 +58,7 @@ public class CustomerDAO {
      * the required UPDATE query but kept read-only in the GUI.
      */
     public boolean updateCustomer(Customer customer) throws SQLException {
-        String sql = "UPDATE customers SET name = ?, phone = ?, email = ?, address = ?, " +
+        String sql = "UPDATE customers SET name = ?, phone = ?, email = ?, address = ? " +
                      "WHERE customer_id = ?";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -67,7 +67,7 @@ public class CustomerDAO {
             ps.setString(2, customer.getPhone());
             ps.setString(3, customer.getEmail());
             ps.setString(4, customer.getAddress());
-            ps.setInt(7, customer.getCustomerId());
+            ps.setInt(5, customer.getCustomerId());
 
             return ps.executeUpdate() > 0;
         }
