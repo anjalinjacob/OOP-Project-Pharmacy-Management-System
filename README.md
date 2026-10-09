@@ -1,184 +1,237 @@
-# Pharmacy Management System (Java Swing + JDBC + MySQL) - v2
+# Pharmacy Management System
 
-A simple desktop Pharmacy Management System built for a 2nd-year BTech
-project, focused on the **Pharmacist** role. Built with plain Java, Swing,
-JDBC and MySQL — no Spring, Hibernate, JavaFX, or cloud services.
+## Project Overview
 
-This version uses **one single window** (`PharmacistHomeFrame`) with a
-header, a navigation bar, and a `CardLayout` content area, instead of
-opening a new `JFrame` for every function.
+The **Pharmacy Management System** is a group project developed to
+simplify common pharmacy operations through a desktop application. It
+provides separate access for **Admin** and **Pharmacist** users and
+supports medicine inventory management, customer records, prescriptions,
+billing, and reports.
 
----
+The application uses **Java Swing** for its graphical user interface and
+**MySQL** for persistent data storage.
 
-## 1. Requirements
+## Key Features
 
-- JDK 11 or later
-- MySQL Server 8.x (or compatible)
-- MySQL Connector/J (JDBC driver) — download `mysql-connector-j-8.x.x.jar`
-  from https://dev.mysql.com/downloads/connector/j/ and place it in `lib/`.
+### 1. Login and Role-Based Access
 
----
+-   Login using a username and password.
+-   Supports two roles: **Admin** and **Pharmacist**.
+-   Displays the features available to the logged-in role.
 
-## 2. Database Setup
+### 2. Admin Features
 
-```
-mysql -u root -p < sql/schema.sql
-```
+#### User Management
 
-This creates the `pharmacy_management` database with 7 tables (`users`,
-`customers`, `medicines`, `prescriptions`, `prescription_medicines`,
-`bills`, `bill_items`) and sample data (1 admin, 2 pharmacists, 3
-customers, 10 medicines with a mix of prescription-required / not,
-low-stock, expired, and expiring-soon items).
+-   Add new Admin and Pharmacist accounts.
+-   Manage user login details.
 
-Sample logins:
-- Pharmacist: `pharma1` / `pharma123`
-- Pharmacist: `pharma2` / `pharma456`
-- Admin: `admin1` / `admin123` (admin module not implemented)
+#### Medicine Management
 
----
+-   Add, update, delete, view, and search medicines.
+-   View stock and expiry information.
+-   Arrange or review medicines according to stock condition.
 
-## 3. Configure & Run
+#### Billing Reports
 
-1. Edit `src/database/DatabaseConnection.java` and set your MySQL password.
-2. Compile and run:
+-   View a summary of pharmacist count, total medicines, bill count, and
+    total income.
+-   View bills and filter them by pharmacist.
+-   Review medicines sold and quantities sold.
+-   View the number of bills handled by each pharmacist.
 
-```
-javac -cp "lib/mysql-connector-j-8.x.x.jar" -d out $(find src -name "*.java")
-java -cp "out:lib/mysql-connector-j-8.x.x.jar" Main
-```
+### 3. Pharmacist Features
 
-(Windows: use `;` instead of `:` in the classpath.)
+#### Customer Management
 
----
+-   Add customer details.
+-   Search customers by ID, name, or phone number.
+-   Update customer details.
+-   Delete customers only when they have no prescription history.
 
-## 4. Project Structure
+#### Prescriptions and Billing
 
-```
-PharmacyManagementSystem/
-├── sql/schema.sql
-├── lib/                              -- put mysql-connector-j jar here
-├── src/
-│   ├── model/
-│   │   ├── User.java
-│   │   ├── Customer.java             -- now has dateOfBirth, gender
-│   │   ├── Medicine.java             -- manufacturer removed, prescriptionRequired added
-│   │   ├── Prescription.java         -- pharmacistId & totalAmount removed
-│   │   ├── PrescriptionMedicine.java -- reused for prescription_medicines AND bill_items
-│   │   └── Bill.java                 -- NEW
-│   ├── dao/
-│   │   ├── UserDAO.java
-│   │   ├── CustomerDAO.java
-│   │   ├── MedicineDAO.java
-│   │   ├── PrescriptionDAO.java      -- no longer does billing/stock
-│   │   └── BillDAO.java              -- NEW: billing + stock update, both sale types
-│   ├── gui/
-│   │   ├── LoginFrame.java
-│   │   ├── PharmacistHomeFrame.java  -- the ONE window: header + nav + CardLayout
-│   │   ├── AddCustomerPanel.java     -- NEW (content panel, not a JFrame)
-│   │   ├── UpdateCustomerPanel.java  -- NEW (search/select, then edit)
-│   │   ├── DeleteCustomerPanel.java  -- NEW (search/select, then delete)
-│   │   ├── SearchCustomerPanel.java  -- NEW
-│   │   ├── IssueMedicinePanel.java   -- NEW: walk-in / no-prescription sale
-│   │   ├── StockReminderPanel.java   -- NEW: low stock + expired + expiring soon
-│   │   ├── PrescriptionPanel.java    -- full-screen workflow panel, nav bar hidden
-│   │   └── BillingPanel.java         -- full-screen workflow panel, nav bar hidden
-│   ├── database/DatabaseConnection.java
-│   ├── session/Session.java
-│   └── Main.java
-└── README.md
-```
+-   Create a prescription for a customer.
+-   Search for medicines and enter quantities.
+-   Finalise a bill for a prescription.
+-   View a customer's previous prescriptions and create a new
+    prescription.
 
----
+#### Issue Medicine Without a Prescription
 
-## 5. How the Single-Window Navigation Works
+-   Bill medicines that do not require a prescription.
+-   Record the sale without creating a prescription.
 
-`PharmacistHomeFrame` holds a top-level `CardLayout` with two cards:
+#### Stock Refill Reminder
 
-- **HOME** — header + navigation bar + a content panel. Clicking a nav
-  button (Add/Update/Delete/Search Customer, Issue Medicine, Stock
-  Reminder) just swaps the panel shown inside the content area. The
-  window itself, the header, and the nav bar never change.
-- **WORKFLOW** — a full-width panel with no header/nav bar at all. The
-  app switches to this card only when the pharmacist starts a
-  prescription (`PrescriptionPanel`) or reaches billing (`BillingPanel`).
-  Finishing or cancelling the workflow calls `returnToHome()`, which
-  switches back to the HOME card.
+-   Identify medicines with low stock.
+-   Identify medicines that are approaching or have passed their expiry
+    date.
 
-This satisfies the requirement that only ONE JFrame exists for the whole
-pharmacist session, with the nav bar hidden specifically during the
-prescription → billing flow.
+### 4. Session Management
 
----
+-   Keep track of the currently logged-in user for role-based
+    operations.
+-   Allow users to log out of the application.
 
-## 6. Database Schema Changes
+## Technology Stack
 
-| Table | Change |
-|---|---|
-| `customers` | `date_registered` replaced with `date_of_birth` and `gender` |
-| `medicines` | `manufacturer` column removed; `prescription_required` (boolean) added |
-| `prescriptions` | `pharmacist_id` and `total_amount` **removed** — a prescription now just records `customer_id` + `prescription_date` |
-| `bills` | **New table.** One bill per sale, prescription-based or walk-in. `prescription_id` is `NULL` for a walk-in sale. `pharmacist_id` always comes from `Session.userId`. |
-| `bill_items` | **New table.** Line items for every bill (replaces the old idea of billing straight off `prescription_medicines`). |
+-   **Language:** Java
+-   **GUI:** Java Swing
+-   **Database:** MySQL
+-   **Database Connectivity:** JDBC with MySQL Connector/J
+-   **IDE:** Visual Studio Code or another Java-compatible IDE
 
-`prescription_medicines` is unchanged in structure — it still records what
-was noted on a prescription — but it's now a pre-billing record, not the
-source of the final invoice. `bill_items` is what the money is actually
-charged against.
+## Project Structure
 
----
+The source code is organised into packages according to their
+responsibilities.
 
-## 7. New / Changed Workflows
-
-### Prescription sale (customer-linked)
-```
-Pharmacist Home (nav visible)
-  → Add/Search Customer → PrescriptionPanel (nav hidden)
-      → Save Prescription (writes prescriptions + prescription_medicines, no stock change)
-      → BillingPanel (nav hidden) → Finalize Bill
-            (writes bills + bill_items, reduces stock, all in one transaction)
-      → back to Pharmacist Home (nav visible)
+``` text
+lib/
+├── mysql-connector-j-26.7.0
+src/
+├── dao/
+│   ├── BillDAO.java
+│   ├── BillingReportsDAO.java
+│   ├── CustomerDAO.java
+│   ├── MedicineDAO.java
+│   ├── PrescriptionDAO.java
+│   └── UserDAO.java
+├── database/
+│   └── DatabaseConnection.java
+├── gui/
+│   ├── AddCustomerPanel.java
+│   ├── AdminHomeFrame.java
+│   ├── BillingPanel.java
+│   ├── BillingReportsPanel.java
+│   ├── DeleteCustomerPanel.java
+│   ├── IssueMedicinePanel.java
+│   ├── LoginFrame.java
+│   ├── ManageUsersPanel.java
+│   ├── MedicineManagementPanel.java
+│   ├── PharmacistHomeFrame.java
+│   ├── PrescriptionPanel.java
+│   ├── SearchCustomerPanel.java
+│   ├── StockReminderPanel.java
+│   └── UpdateCustomerPanel.java
+├── model/
+│   ├── Bill.java
+│   ├── Customer.java
+│   ├── Medicine.java
+│   ├── Prescription.java
+│   ├── PrescriptionMedicine.java
+│   └── User.java
+├── session/
+│   └── Session.java
+└── Main.java
 ```
 
-### Walk-in sale (no customer, no prescription)
+**Package responsibilities**
+
+-   **`dao/`** --- Data Access Objects that handle database operations
+    for users, customers, medicines, prescriptions, bills, and reports.
+-   **`database/`** --- Database connection and related configuration.
+-   **`gui/`** --- Swing frames and panels used to display the
+    application's screens and workflows.
+-   **`model/`** --- Java classes representing the application's main
+    data entities.
+-   **`session/`** --- Holds information about the current user session.
+-   **`Main.java`** --- Application entry point that launches the login
+    screen.
+
+## Database Design
+
+The database is named `pharmacy_management`. The provided schema defines
+these tables:
+```text
+  -----------------------------------------------------------------------
+  Table                               Purpose
+  ----------------------------------- -----------------------------------
+  `users`                             Login accounts and roles for Admins
+                                      and Pharmacists
+
+  `customers`                         Customer contact and registration
+                                      details
+
+  `medicines`                         Medicine category, price, stock,
+                                      expiry date, and prescription
+                                      requirement
+
+  `prescriptions`                     Prescription records associated
+                                      with customers
+
+  `prescription_medicines`            Medicines, quantities, and prices
+                                      associated with prescriptions
+
+  `bills`                             Bill amount, date, pharmacist, and
+                                      optional prescription reference
+
+  `bill_items`                        Medicines and quantities included
+                                      in each bill
+
+  -----------------------------------------------------------------------
 ```
-Pharmacist Home → "Issue Medicine Without Prescription" (nav stays visible)
-  → search medicines with prescription_required = false
-  → build cart → Finalize Bill directly
-        (writes bills with prescription_id = NULL, writes bill_items, reduces stock)
-  → stays on the same screen, ready for the next walk-in customer
-```
+The SQL schema and sample records are provided in `sql/schema.sql`
+## Setup and Running
 
-### Stock Refill Reminder
-Now flags THREE conditions, not just low stock:
-- `stock_quantity <= 10` → **LOW STOCK**
-- `expiry_date < CURDATE()` → **EXPIRED**
-- expiring within 30 days → **EXPIRING SOON**
-- both low stock and expiring soon → **LOW STOCK + EXPIRING SOON**
+### Prerequisites
 
----
+-   Java Development Kit (JDK) installed.
+-   MySQL Server installed and running.
+-   MySQL Connector/J added to the project's classpath.
+-   A Java IDE or terminal for compiling and running the application.
 
-## 8. A Note on One Inconsistency in the Spec
+### 1. Create the database
 
-The change request's "Update Customer" section (§7) shows a form with
-only Name/Phone/Email/Address editable, but its SQL example also sets
-`date_of_birth` and `gender`. The authoritative table list (§22) confirms
-`customers` has `date_of_birth`/`gender` and **no** `date_registered` at
-all. I went with the §22 schema everywhere (Add Customer collects DOB +
-gender instead of a registration date), and made DOB/gender editable in
-Update Customer too, to match the UPDATE query you provided. If you'd
-rather keep a `date_registered` column alongside DOB/gender, that's an
-easy follow-up change.
+1.  Open MySQL Workbench or another MySQL client.
+2.  Review the SQL schema file.
+3.  Execute the schema to create the `pharmacy_management` database and
+    its tables.
 
----
+### 2. Configure the database connection
 
-## 9. JDBC & Validation Practices Kept From v1
+Open the database connection configuration in the `database/` folder and
+set the JDBC URL, MySQL username, and password for your local
+environment.
 
-- Every query uses `PreparedStatement`.
-- `try-with-resources` for `Connection`/`PreparedStatement`/`ResultSet`.
-- Stock is only ever reduced inside `BillDAO`, during Finalize Bill,
-  using `UPDATE ... WHERE stock_quantity >= ?` so a race condition fails
-  safely instead of going negative.
-- Saving a prescription and finalizing a bill both run inside explicit
-  JDBC transactions (`setAutoCommit(false)` + `commit()` / `rollback()`).
-- All user-facing errors go through `JOptionPane` instead of raw stack traces.
+### 3. Compile and run
+
+Compile the Java source files with the MySQL Connector/J JAR available
+on the classpath, then run the `Main` class. The exact command depends
+on the folder structure and location of the connector JAR in your local
+project.
+
+If you use Visual Studio Code, ensure that the JDK and Java extensions
+are configured correctly and that the database connector is available to
+the project.
+
+## Sample Login Data
+
+The schema contains these sample accounts:
+```text
+  Role         Username    Password
+  ------------ ----------- -------------
+  Admin        `admin1`    `admin123`
+
+  Pharmacist   `pharma1`   `pharma123`
+
+  Pharmacist   `pharma2`   `pharma456`
+  ```
+
+These are development/demo credentials only.
+
+## Group Project
+
+This application is developed as a group project for academic purposes.
+It demonstrates the integration of Java GUI programming, database
+connectivity, object-oriented design, and SQL-based data management in a
+practical pharmacy workflow.
+
+## Future Improvements
+
+-   Store passwords using a secure password-hashing method.
+-   Add stronger validation and clearer error messages.
+-   Improve audit logging for inventory changes and billing operations.
+-   Add automated tests for database and business-logic operations.
+-   Add database backup and recovery procedures.

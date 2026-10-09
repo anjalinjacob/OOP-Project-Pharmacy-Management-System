@@ -19,7 +19,7 @@ public class AddCustomerPanel extends JPanel {
 
     private final PharmacistHomeFrame homeFrame;
     private final CustomerDAO customerDAO = new CustomerDAO();
-
+    private JLabel customerIdLabel;
     private JTextField nameField;
     private JTextField phoneField;
     private JTextField emailField;
@@ -59,7 +59,8 @@ public AddCustomerPanel(PharmacistHomeFrame homeFrame) {
     gbc.gridy = row;
     add(makeLabel("Customer ID:"), gbc);
     gbc.gridx = 1;
-    add(makeLabel("(auto-generated)"), gbc);
+    customerIdLabel = makeLabel("(auto-generated)");
+    add(customerIdLabel, gbc);
     row++;
 
     gbc.gridx = 0;
@@ -177,14 +178,16 @@ private JTextField makeField() {
             customer.setCustomerId(newId);
 
             int choice = JOptionPane.showConfirmDialog(this,
-                    "Customer added successfully.\nDo you want to create a new prescription?",
+                    "Customer added successfully.\nCustomer ID: " + newId
+                    + "\nDo you want to create a new prescription?",
                     "Success", JOptionPane.YES_NO_OPTION);
 
             if (choice == JOptionPane.YES_OPTION) {
                 homeFrame.startPrescriptionWorkflow(customer);
             } else {
                 clearFields();
-                JOptionPane.showMessageDialog(this, "Customer added successfully.",
+                JOptionPane.showMessageDialog(this,
+                        "Customer added successfully.",
                         "Success", JOptionPane.INFORMATION_MESSAGE);
             }
         } catch (SQLException ex) {
