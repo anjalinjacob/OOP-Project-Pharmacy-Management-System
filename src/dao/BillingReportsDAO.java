@@ -69,8 +69,7 @@ public class BillingReportsDAO {
 
         // 4. Number of medicines currently available (in stock and not expired)
     public int getAvailableMedicines() throws SQLException {
-        String sql = "SELECT COUNT(*) FROM medicines " +
-                     "WHERE stock_quantity > 0 AND expiry_date >= CURDATE()";
+        String sql = "SELECT COUNT(*) FROM medicines ";
 
         try (Connection con = DatabaseConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(sql);
