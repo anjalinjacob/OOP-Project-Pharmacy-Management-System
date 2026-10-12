@@ -31,7 +31,7 @@ public class MedicineDAO {
 
     /** Searches ALL medicines whose name contains the given text (used by the prescription workflow). */
     public List<Medicine> searchByName(String name) throws SQLException {
-        String sql = "SELECT " + COLUMNS + " FROM medicines WHERE medicine_name LIKE ?";
+        String sql = "SELECT " + COLUMNS + " FROM medicines WHERE medicine_name LIKE ? and stock_quantity>0 and expiry_date>=CURDATE()";
         return runNameSearch(sql, name);
     }
 
