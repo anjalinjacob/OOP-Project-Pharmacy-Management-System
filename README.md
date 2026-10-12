@@ -11,6 +11,20 @@ billing, and reports.
 The application uses **Java Swing** for its graphical user interface and
 **MySQL** for persistent data storage.
 
+## Group Members
+
+Anjalin Jacob
+
+Ann Mathew
+
+Fathima Rana P K
+
+Sohini Bawali
+
+Sumedha N
+
+Sreelakshmi J M
+
 ## Key Features
 
 ### 1. Login and Role-Based Access
